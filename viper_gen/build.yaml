@@ -1,0 +1,8 @@
+builders:
+  mappable:
+    import: "package:viper_gen/builder.dart"
+    builder_factories: ["presenterBuilder"]
+    build_extensions: {".dart": [".presenter.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
