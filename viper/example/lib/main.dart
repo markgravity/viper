@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:viper/viper.dart';
 
-abstract class MyHomeViewDelegate {
+abstract class StateDidInitViewDelegate {
   BehaviorSubject<void> get stateDidInit;
+}
 
+abstract class MyHomeViewDelegate implements StateDidInitViewDelegate {
   BehaviorSubject<void> get incrementButtonDidTap;
 }
 

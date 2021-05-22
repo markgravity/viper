@@ -6,18 +6,13 @@ import 'package:viper/annotation.dart';
 
 class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
   @override
-  generateForAnnotatedElement(
-      Element element, ConstantReader annotation, BuildStep buildStep) {
+  generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) {
     final content = StringBuffer();
 
     final classElement = element as ClassElement;
     final allElementFieldNames = classElement.fields.map((e) => e.name);
-    final allInterfaceFields = classElement.interfaces
-        .map((e) => e.element.fields)
-        .reduce((value, element) => value + element)
-        .where((element) =>
-            !allElementFieldNames.contains(element.name) &&
-            _isBehaviorSubject(element));
+    final allInterfaceFields =
+        _getAllField(classElement).where((element) => !allElementFieldNames.contains(element.name));
 
     content.writeln("${classElement.name} _\$Bound${classElement.name}() {");
     content.writeln(" final presenter = ${classElement.name}._();");
@@ -42,8 +37,7 @@ class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
       final genericType = type.typeArguments.first;
       genericType.isVoid
           ? content.writeln("void \$${field.name}() {}")
-          : content.writeln(
-              "void \$${field.name}(${genericType.toString()} data) {}");
+          : content.writeln("void \$${field.name}(${genericType.toString()} data) {}");
     }
     content.writeln("}");
     return content.toString();
@@ -59,5 +53,15 @@ class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
     } while (classElement != null);
 
     return false;
+  }
+
+  List<FieldElement> _getAllField(ClassElement classElement) {
+    if (classElement.interfaces.length == 0) return [];
+
+    return classElement.interfaces
+        .map((e) => e.element.fields + _getAllField(e.element))
+        .reduce((value, element) => value + element)
+        .where((element) => _isBehaviorSubject(element))
+        .toList();
   }
 }
