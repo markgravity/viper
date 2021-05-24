@@ -38,7 +38,7 @@ abstract class ArgumentsModule<V extends View, P extends ArgumentsPresenter, R e
   late final A? overriddenArguments;
 
   void setArguments(Object? arguments) {
-    presenter.arguments = arguments as A;
+    presenter.arguments = overriddenArguments ?? arguments as A;
   }
 }
 
