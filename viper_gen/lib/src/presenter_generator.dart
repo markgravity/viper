@@ -36,6 +36,7 @@ class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
 
       final type = field.type as InterfaceType;
       final genericType = type.typeArguments.first;
+      content.writeln("// ignore: unused_element ");
       genericType.isVoid
           ? content.writeln("void _${field.name}() {}")
           : content.writeln("void _${field.name}(${genericType.toString()} data) {}");

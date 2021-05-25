@@ -1,3 +1,7 @@
+## [0.0.4]
+
+- Ignore unused_element in bound functions
+
 ## [0.0.3]
 
 - Refactor generated bound function names

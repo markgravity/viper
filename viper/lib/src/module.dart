@@ -33,13 +33,16 @@ abstract class Module<V extends View, P extends Presenter, R extends Router>
   }
 }
 
-// ignore: must_be_immutable
 abstract class ArgumentsModule<V extends View, P extends ArgumentsPresenter, R extends Router,
     A extends ModuleArguments> extends Module<V, P, R> {
-  A? overriddenArguments;
+  late final A? overriddenArguments;
 
   void setArguments(Object? arguments) {
-    presenter.arguments = overriddenArguments ?? arguments as A;
+    try {
+      presenter.arguments = overriddenArguments!;
+    } catch(e) {
+      presenter.arguments = arguments as A;
+    }
   }
 }
 
