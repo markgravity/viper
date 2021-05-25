@@ -21,5 +21,5 @@ abstract class Presenter<V extends View, R extends Router> {
 
 abstract class ArgumentsPresenter<V extends View, R extends Router, A extends ModuleArguments>
     extends Presenter<V, R> {
-  A? arguments;
+  late A arguments;
 }

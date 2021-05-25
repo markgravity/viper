@@ -14,21 +14,22 @@ class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
     final allInterfaceFields =
         _getAllField(classElement).where((element) => !allElementFieldNames.contains(element.name));
 
-    content.writeln("${classElement.name} _\$Bound${classElement.name}() {");
+    content.writeln("// ignore: non_constant_identifier_names");
+    content.writeln("${classElement.name} _Bound${classElement.name}() {");
     content.writeln(" final presenter = ${classElement.name}._();");
     for (final field in allInterfaceFields) {
       final type = field.type as InterfaceType;
       final genericType = type.typeArguments.first;
       genericType.isVoid
           ? content.writeln(
-              " presenter.${field.name}.voidListen(presenter.\$${field.name}).addTo(presenter.disposeBag);")
+              " presenter.${field.name}.voidListen(presenter._${field.name}).addTo(presenter.disposeBag);")
           : content.writeln(
-              " presenter.${field.name}.listen(presenter.\$${field.name}).addTo(presenter.disposeBag);");
+              " presenter.${field.name}.listen(presenter._${field.name}).addTo(presenter.disposeBag);");
     }
     content.writeln(" return presenter;");
     content.writeln("}");
 
-    content.writeln("mixin _\$${classElement.name} {");
+    content.writeln("mixin _${classElement.name} {");
     for (final field in allInterfaceFields) {
       content.writeln("// ignore: close_sinks");
       content.writeln(" final ${field.name} = ${field.type.toString()}();");
@@ -36,8 +37,8 @@ class PresenterGenerator extends GeneratorForAnnotation<PresenterAnnotation> {
       final type = field.type as InterfaceType;
       final genericType = type.typeArguments.first;
       genericType.isVoid
-          ? content.writeln("void \$${field.name}() {}")
-          : content.writeln("void \$${field.name}(${genericType.toString()} data) {}");
+          ? content.writeln("void _${field.name}() {}")
+          : content.writeln("void _${field.name}(${genericType.toString()} data) {}");
     }
     content.writeln("}");
     return content.toString();
