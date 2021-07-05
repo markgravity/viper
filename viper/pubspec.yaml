@@ -1,6 +1,6 @@
 name: viper
 description: An elegant way to adapt VIPER architecture into Flutter project.
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/markgravity/viper/tree/master/viper
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  rxdart: ^0.27.0
+  rxdart: ^0.27.1
   stream_selector: ^0.0.2
 
 dev_dependencies:

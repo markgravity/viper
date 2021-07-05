@@ -12,7 +12,10 @@ abstract class Presenter<V extends View, R extends Router> {
   }) {
     this.view = view;
     this.router = router;
+    onReady();
   }
+
+  void onReady() {}
 
   void dispose() {
     disposeBag.dispose();

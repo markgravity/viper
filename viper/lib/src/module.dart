@@ -2,7 +2,6 @@ import 'dart:core';
 
 import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
-
 part 'presenter.dart';
 
 part 'interactor.dart';
@@ -20,8 +19,8 @@ abstract class Module<V extends View, P extends Presenter, R extends Router>
 
   void assembly(V view) {
     this.view = view;
+    router.context = view.context;
 
-    view.delegate = presenter;
     presenter.configure(
       view: view,
       router: router,

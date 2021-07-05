@@ -1,18 +1,17 @@
 part of 'module.dart';
 
-abstract class View<D> {
+abstract class View {
   BuildContext get context;
-
-  D? delegate;
+  Stream<void> get stateDidInit;
 }
 
-abstract class ViewState<V extends StatefulWidget, M extends Widget, D>
-    extends State<V> implements View<D> {
+abstract class ViewState<V extends StatefulWidget, M extends Widget>
+    extends State<V> implements View {
   @visibleForTesting
   static Module? overriddenModule;
   Module? _disposedModule;
-  @override
-  D? delegate;
+
+  BehaviorSubject<void> stateDidInit = BehaviorSubject();
 
   @override
   void initState() {
@@ -20,6 +19,7 @@ abstract class ViewState<V extends StatefulWidget, M extends Widget, D>
 
     final module = _getModule();
     module?.assembly(this);
+    stateDidInit.add(null);
   }
 
   @override

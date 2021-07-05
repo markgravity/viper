@@ -1,3 +1,7 @@
+## [0.0.4]
+
+Update mechanism
+
 ## [0.0.3]
 
 Fix: module warnings

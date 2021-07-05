@@ -1,82 +1,50 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:viper/viper.dart';
 
-abstract class StateDidInitViewDelegate {
-  BehaviorSubject<void> get stateDidInit;
+abstract class MyHomeView extends View {
+  BehaviorSubject<int> get counter;
+
+  Stream<void> get incrementButtonDidTap;
 }
 
-abstract class MyHomeViewDelegate implements StateDidInitViewDelegate {
-  BehaviorSubject<void> get incrementButtonDidTap;
-}
-
-abstract class MyHomeView extends View<MyHomeViewDelegate> {
-  void setCounter(int counter);
-}
-
-abstract class CounterInteractorDelegate {
-  BehaviorSubject<void> get counterDidIncrement;
-}
-
-abstract class CounterInteractor extends Interactor<CounterInteractorDelegate> {
-  int get counter;
-
-  void increment();
-}
-
-class CounterInteractorImpl extends CounterInteractor {
+class CounterInteractor extends Interactor {
   var _counter = 0;
+
   int get counter => _counter;
 
-  void increment() {
+  Stream<int> increment() {
     _counter++;
-    delegate?.counterDidIncrement.add(null);
+    return Stream.value(_counter);
   }
 }
 
-abstract class MyHomeRouter extends Router {}
+class MyHomeRouter extends Router {}
 
-class MyHomeRouterImpl extends MyHomeRouter {}
-
-abstract class MyHomePresenter extends Presenter<MyHomeView, MyHomeRouter> {}
-
-class MyHomePresenterImpl extends MyHomePresenter
-    implements MyHomeViewDelegate, CounterInteractorDelegate {
-  MyHomePresenterImpl() {
-    stateDidInit.voidListen(_stateDidInit).addTo(disposeBag);
-    incrementButtonDidTap.voidListen(_incrementButtonDidTap).addTo(disposeBag);
-    counterDidIncrement.voidListen(_counterDidIncrement).addTo(disposeBag);
-  }
-
-  late final counterInteractor = CounterInteractorImpl()..delegate = this;
+class MyHomePresenter extends Presenter<MyHomeView, MyHomeRouter> {
+  late final counterInteractor = CounterInteractor();
 
   @override
-  final stateDidInit = BehaviorSubject<void>();
+  void onReady() {
+    super.onReady();
 
-  @override
-  final incrementButtonDidTap = BehaviorSubject<void>();
+    MergeStream([
+      view.stateDidInit
+        .map((event) => counterInteractor.counter),
+      view.incrementButtonDidTap
+        .flatMap((value) => counterInteractor.increment())
+    ])
+        .bind(view.counter)
+        .addTo(disposeBag);
 
-  @override
-  final counterDidIncrement = BehaviorSubject<void>();
-
-  void _stateDidInit() {
-    view.setCounter(counterInteractor.counter);
-  }
-
-  void _incrementButtonDidTap() {
-    counterInteractor.increment();
-  }
-
-  void _counterDidIncrement() {
-    view.setCounter(counterInteractor.counter);
   }
 }
 
 class MyHomeModule extends Module<MyHomeView, MyHomePresenter, MyHomeRouter> {
   @override
-  final presenter = MyHomePresenterImpl();
+  final presenter = MyHomePresenter();
 
   @override
-  final router = MyHomeRouterImpl();
+  final router = MyHomeRouter();
 
   @override
   Widget build(BuildContext context) {
@@ -127,10 +95,12 @@ class MyHomeViewImpl extends StatefulWidget {
   _MyHomeViewImplState createState() => _MyHomeViewImplState();
 }
 
-class _MyHomeViewImplState extends ViewState<MyHomeViewImpl, MyHomeModule, MyHomeViewDelegate>
-    implements MyHomeView {
-  // ignore: close_sinks
-  final _counter = BehaviorSubject<int>();
+class _MyHomeViewImplState extends ViewState<MyHomeViewImpl, MyHomeModule> implements MyHomeView {
+  @override
+  final counter = BehaviorSubject<int>.seeded(0);
+
+  @override
+  BehaviorSubject<void> incrementButtonDidTap = BehaviorSubject();
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +140,7 @@ class _MyHomeViewImplState extends ViewState<MyHomeViewImpl, MyHomeModule, MyHom
               'You have pushed the button this many times:',
             ),
             StreamSelector<int>(
-              stream: _counter,
+              stream: counter,
               builder: (_, counter, __) => Text(
                 '$counter',
                 style: Theme.of(context).textTheme.headline4,
@@ -180,15 +150,10 @@ class _MyHomeViewImplState extends ViewState<MyHomeViewImpl, MyHomeModule, MyHom
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => delegate?.incrementButtonDidTap.add(null),
+        onPressed: () => incrementButtonDidTap.add(null),
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
-  }
-
-  @override
-  void setCounter(int counter) {
-    _counter.add(counter);
   }
 }
